@@ -63,8 +63,10 @@ export default function ResponseList() {
 
       const { textStream } = await streamText({
         model: modelInstance,
-        messages: messages,
-        maxTokens: 1000,
+        messages: messages.map((msg) => ({
+          role: msg.role as "user" | "assistant" | "system",
+          content: msg.content,
+        })),
       })
 
       let fullContent = ""
