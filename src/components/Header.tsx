@@ -15,10 +15,10 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div>
-              <h1 className="text-2xl font-bold bg-gray-900 bg-clip-text text-transparent">
+              <h1 className="md:text-2xl sm:text-lg font-bold bg-gray-900 bg-clip-text text-transparent">
                 AI-Madness
               </h1>
-              <p className="text-xs text-muted-foreground">Compare AI responses side by side</p>
+              <p className="text-xs hidden md:block text-muted-foreground">Compare AI responses side by side</p>
             </div>
           </div>
         </div>
@@ -30,12 +30,8 @@ export default function Header() {
             </div>
           )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen(true)}
-            className="hover:bg-accent/80 transition-colors"
-          >
+          <Button className="flex items-center w-32 text-sm bg-white border border-black px-2 py-1 rounded-lg cursor-pointer hover:bg-accent/80 transition-colors mx-2" variant="ghost" size="icon" onClick={() => setOpen(true)}>
+            Add API Keys
             <Settings className="h-5 w-5" />
           </Button>
 
