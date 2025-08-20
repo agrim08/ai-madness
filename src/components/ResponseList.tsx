@@ -9,6 +9,7 @@ import { createGroq } from "@ai-sdk/groq"
 import { createAnthropic } from "@ai-sdk/anthropic"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Loader2, AlertCircle, Bot, MessageSquare, CheckCircle2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface StreamingResponse {
   model: string
@@ -215,30 +216,55 @@ export default function ResponseList() {
     return null
   }
 
-  const getModelColor = (model: string) => {
-    const colors = {
-      openai: "bg-green-600",
-      gemini: "bg-blue-600",
-      groq: "bg-orange-600",
-      deepseek: "bg-purple-600",
-      anthropic: "bg-indigo-600",
+  const getModelConfig = (model: string) => {
+    const configs = {
+      openai: { 
+        color: "bg-green-600", 
+        borderColor: "border-green-200",
+        bgColor: "bg-green-50",
+        textColor: "text-green-800",
+        name: "OpenAI"
+      },
+      gemini: { 
+        color: "bg-blue-600", 
+        borderColor: "border-blue-200",
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-800",
+        name: "Gemini"
+      },
+      groq: { 
+        color: "bg-orange-600", 
+        borderColor: "border-orange-200",
+        bgColor: "bg-orange-50",
+        textColor: "text-orange-800",
+        name: "Groq"
+      },
+      deepseek: { 
+        color: "bg-purple-600", 
+        borderColor: "border-purple-200",
+        bgColor: "bg-purple-50",
+        textColor: "text-purple-800",
+        name: "DeepSeek"
+      },
+      anthropic: { 
+        color: "bg-indigo-600", 
+        borderColor: "border-indigo-200",
+        bgColor: "bg-indigo-50",
+        textColor: "text-indigo-800",
+        name: "Claude"
+      },
     }
-    return colors[model as keyof typeof colors] || "bg-gray-600"
-  }
-
-  const getModelBorderColor = (model: string) => {
-    const colors = {
-      openai: "border-green-200",
-      gemini: "border-blue-200",
-      groq: "border-orange-200",
-      deepseek: "border-purple-200",
-      anthropic: "border-indigo-200",
+    return configs[model as keyof typeof configs] || { 
+      color: "bg-gray-600", 
+      borderColor: "border-gray-200",
+      bgColor: "bg-gray-50",
+      textColor: "text-gray-800",
+      name: model.charAt(0).toUpperCase() + model.slice(1)
     }
-    return colors[model as keyof typeof colors] || "border-gray-200"
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="border-b border-border pb-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -249,23 +275,29 @@ export default function ResponseList() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {activeModelsList.map((model) => {
           const response = streamingResponses[model]
           const hasKey = keys[model as keyof typeof keys]
+          const config = getModelConfig(model)
 
           if (!hasKey) return null
 
           return (
             <Card
               key={model}
-              className={`transition-all duration-200 hover:shadow-md ${getModelBorderColor(model)} border-2`}
+              className={`w-full transition-all duration-200 hover:shadow-md ${config.borderColor} border-l-4`}
             >
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`h-4 w-4 rounded-full ${getModelColor(model)}`}></div>
-                    <h3 className="font-semibold text-lg capitalize">{model}</h3>
+                    <div className={`h-3 w-3 rounded-full ${config.color}`}></div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg">{config.name}</h3>
+                      <Badge variant="secondary" className="text-xs">
+                        {model}
+                      </Badge>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -298,22 +330,22 @@ export default function ResponseList() {
                     <div className="text-red-600 text-sm">{response.error}</div>
                   </div>
                 ) : response?.content ? (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-foreground leading-relaxed whitespace-pre-wrap">
+                  <div className={`${config.bgColor} rounded-lg p-4 border ${config.borderColor}`}>
+                    <div className={`${config.textColor} leading-relaxed whitespace-pre-wrap text-sm`}>
                       {response.content}
                       {response.isLoading && (
-                        <span className="inline-block w-2 h-5 bg-blue-600 animate-pulse ml-1 rounded-sm" />
+                        <span className={`inline-block w-2 h-5 ${config.color} animate-pulse ml-1 rounded-sm`} />
                       )}
                     </div>
                   </div>
                 ) : response?.isLoading ? (
-                  <div className="bg-blue-50 rounded-lg p-6 text-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto mb-3" />
-                    <div className="text-blue-800 font-medium">Generating response...</div>
-                    <div className="text-blue-600 text-sm mt-1">This may take a few moments</div>
+                  <div className={`${config.bgColor} rounded-lg p-6 text-center border ${config.borderColor}`}>
+                    <Loader2 className={`h-6 w-6 animate-spin mx-auto mb-3 ${config.textColor}`} />
+                    <div className={`${config.textColor} font-medium`}>Generating response...</div>
+                    <div className={`${config.textColor} opacity-70 text-sm mt-1`}>This may take a few moments</div>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 rounded-lg p-6 text-center">
+                  <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
                     <div className="h-2 w-2 bg-gray-400 rounded-full animate-pulse mx-auto mb-2"></div>
                     <span className="text-gray-600 text-sm">Waiting to start...</span>
                   </div>

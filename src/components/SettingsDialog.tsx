@@ -81,7 +81,7 @@ export default function SettingsDialog({ open, setOpen }: { open: boolean; setOp
                   placeholder={`Enter ${info.name} API key`}
                   value={temp[model] || ""}
                   onChange={(e) => setTemp({ ...temp, [model]: e.target.value })}
-                  className="font-mono text-sm"
+                  className="font-mono text-xs"
                 />
               </div>
             )

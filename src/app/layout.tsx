@@ -36,10 +36,8 @@ export default function RootLayout({
           <SignedIn>
             <Header />
             <main className="flex min-h-[calc(100vh-80px)]">
-              <aside className="hidden md:block">
-                <div className="sticky top-6 h-[calc(100vh-120px)]">
-                  <ChatSidebar />
-                </div>
+              <aside>
+                <ChatSidebar />
               </aside>
 
               <section className="flex-1 p-6 space-y-6 transition-all duration-300">

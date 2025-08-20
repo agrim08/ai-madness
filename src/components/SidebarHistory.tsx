@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
 import { useAIStore } from "@/store/ai-store"
 import { Button } from "@/components/ui/button"
@@ -11,41 +10,54 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 export default function ChatSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)    // for mobile drawer
+  const [isCollapsed, setIsCollapsed] = useState(false) // for desktop collapse
   const { chatSessions, currentChatId, createNewChat, selectChat, deleteChat } = useAIStore()
 
-  const handleNewChat = () => {
-    createNewChat()
-  }
-
-  const handleSelectChat = (chatId: string) => {
-    selectChat(chatId)
-  }
-
+  const handleNewChat = () => createNewChat()
+  const handleSelectChat = (chatId: string) => selectChat(chatId)
   const handleDeleteChat = (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     deleteChat(chatId)
   }
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed)
-  }
-
   return (
     <>
+      {/* Mobile Hamburger Button */}
+      <div className="md:hidden p-2">
+        <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)} className="h-8 w-8 p-0">
+          <Menu className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Sidebar Container */}
       <div
         className={cn(
-          "h-full bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shadow-sm relative",
-          isCollapsed ? "w-12" : "w-80",
+          "bg-white border-r border-slate-200 shadow-sm transition-all duration-300 ease-in-out z-50",
+          "fixed top-0 left-0 h-full w-64 md:relative md:h-auto md:w-80",
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          isCollapsed && "md:w-12"
         )}
       >
+        {/* Sidebar Header */}
         <div className="flex items-center justify-between p-3 border-b border-slate-200">
-          <Button variant="ghost" size="sm" onClick={toggleSidebar} className="h-8 w-8 p-0 hover:bg-slate-100">
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => (isOpen ? setIsOpen(false) : setIsCollapsed(!isCollapsed))}
+            className="h-8 w-8 p-0 hover:bg-slate-100"
+          >
+            {/* Mobile → always X */}
+            <X className="h-4 w-4 block md:hidden" />
+            {/* Desktop → toggle between Menu and X */}
+            {isCollapsed 
+              ? <Menu className="h-4 w-4 hidden md:block" /> 
+              : <X className="h-4 w-4 hidden md:block" />}
           </Button>
-          {!isCollapsed && <span className="text-sm font-semibold text-slate-700">Chats</span>}
+          {!isCollapsed && <span className="text-sm font-semibold text-slate-700 hidden md:block">Chats</span>}
         </div>
 
+        {/* Sidebar Content */}
         {!isCollapsed && (
           <div className="p-4 space-y-4 h-[calc(100%-60px)] flex flex-col">
             <Button
@@ -154,6 +166,9 @@ export default function ChatSidebar() {
           </div>
         )}
       </div>
+
+      {/* Mobile overlay background when sidebar is open */}
+      {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setIsOpen(false)} />}
     </>
   )
 }

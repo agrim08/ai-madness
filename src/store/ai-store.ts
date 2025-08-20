@@ -6,17 +6,17 @@ export type AIModel = "openai" | "gemini" | "groq" | "deepseek" | "anthropic";
 
 interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: number;
-  model?: AIModel; 
+  model?: AIModel;
 }
 
 interface ChatSession {
   id: string;
   title: string;
   messages: ChatMessage[];
-  activeModels: Record<AIModel, boolean>; 
+  activeModels: Record<AIModel, boolean>;
   createdAt: number;
   updatedAt: number;
 }
@@ -30,17 +30,18 @@ interface ResponseItem {
 }
 
 interface AIStore {
-  // Current prompt (for backward compatibility)
+  // Prompt for backward compatibility
   prompt: string;
   setPrompt: (val: string) => void;
 
-  // API Keys
+  // API Keys & models
   keys: Record<AIModel, string | null>;
   activeModels: Record<AIModel, boolean>;
   setKey: (model: AIModel, key: string) => void;
   toggleModel: (model: AIModel, active: boolean) => void;
   loadKeys: () => void;
 
+  // Chat sessions
   currentChatId: string | null;
   chatSessions: ChatSession[];
   createNewChat: () => void;
@@ -54,14 +55,16 @@ interface AIStore {
   saveChatSessions: () => void;
   loadChatSessions: () => void;
 
+  // Responses
   responses: ResponseItem[];
   addResponse: (res: ResponseItem) => void;
   clearResponses: () => void;
 }
 
+// Helpers
 const generateChatTitle = (firstMessage: string): string => {
-  const words = firstMessage.trim().split(' ').slice(0, 6);
-  return words.length < 6 ? words.join(' ') : words.join(' ') + '...';
+  const words = firstMessage.trim().split(" ").slice(0, 6);
+  return words.length < 6 ? words.join(" ") : words.join(" ") + "...";
 };
 
 const generateId = (): string => {
@@ -131,7 +134,6 @@ export const useAIStore = create<AIStore>((set, get) => ({
       }
     });
     set({ keys: newKeys, activeModels: newActive });
-    
     get().loadChatSessions();
   },
 
@@ -152,34 +154,34 @@ export const useAIStore = create<AIStore>((set, get) => ({
     set((state) => ({
       currentChatId: newChatId,
       chatSessions: [newChat, ...state.chatSessions],
-      prompt: "", 
+      prompt: "",
     }));
 
     get().saveChatSessions();
   },
 
   selectChat: (chatId) => {
-    const chat = get().chatSessions.find(c => c.id === chatId);
+    const chat = get().chatSessions.find((c) => c.id === chatId);
     if (chat) {
-      set({ 
+      set({
         currentChatId: chatId,
-        prompt: "", 
-        activeModels: chat.activeModels 
+        prompt: "",
+        activeModels: chat.activeModels,
       });
     }
   },
 
   addMessageToChat: (chatId, message) => {
     set((state) => ({
-      chatSessions: state.chatSessions.map(chat => 
-        chat.id === chatId 
-          ? { 
-              ...chat, 
+      chatSessions: state.chatSessions.map((chat) =>
+        chat.id === chatId
+          ? {
+              ...chat,
               messages: [...chat.messages, message],
-              updatedAt: Date.now()
+              updatedAt: Date.now(),
             }
           : chat
-      )
+      ),
     }));
     get().saveChatSessions();
   },
@@ -190,7 +192,7 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
     const userMessage: ChatMessage = {
       id: generateId(),
-      role: 'user',
+      role: "user",
       content,
       timestamp: Date.now(),
     };
@@ -209,7 +211,7 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
     const assistantMessage: ChatMessage = {
       id: generateId(),
-      role: 'assistant',
+      role: "assistant",
       content,
       timestamp: Date.now(),
       model,
@@ -220,20 +222,18 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
   updateChatTitle: (chatId, title) => {
     set((state) => ({
-      chatSessions: state.chatSessions.map(chat => 
-        chat.id === chatId 
-          ? { ...chat, title, updatedAt: Date.now() }
-          : chat
-      )
+      chatSessions: state.chatSessions.map((chat) =>
+        chat.id === chatId ? { ...chat, title, updatedAt: Date.now() } : chat
+      ),
     }));
     get().saveChatSessions();
   },
 
   deleteChat: (chatId) => {
     set((state) => {
-      const newChatSessions = state.chatSessions.filter(chat => chat.id !== chatId);
+      const newChatSessions = state.chatSessions.filter((chat) => chat.id !== chatId);
       const newCurrentChatId = state.currentChatId === chatId ? null : state.currentChatId;
-      
+
       return {
         chatSessions: newChatSessions,
         currentChatId: newCurrentChatId,
@@ -245,22 +245,22 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
   getCurrentChat: () => {
     const { currentChatId, chatSessions } = get();
-    return currentChatId ? chatSessions.find(chat => chat.id === currentChatId) || null : null;
+    return currentChatId ? chatSessions.find((chat) => chat.id === currentChatId) || null : null;
   },
 
   saveChatSessions: () => {
     const { chatSessions } = get();
-    localStorage.setItem('chat-sessions', JSON.stringify(chatSessions));
+    localStorage.setItem("chat-sessions", JSON.stringify(chatSessions));
   },
 
   loadChatSessions: () => {
-    const saved = localStorage.getItem('chat-sessions');
+    const saved = localStorage.getItem("chat-sessions");
     if (saved) {
       try {
         const chatSessions = JSON.parse(saved);
         set({ chatSessions });
       } catch (error) {
-        console.error('Failed to load chat sessions:', error);
+        console.error("Failed to load chat sessions:", error);
       }
     }
   },
@@ -268,7 +268,6 @@ export const useAIStore = create<AIStore>((set, get) => ({
   responses: [],
   addResponse: (res) => {
     set((state) => ({ responses: [res, ...state.responses] }));
-    
     const { currentChatId } = get();
     if (currentChatId) {
       get().addAssistantMessage(res.content, res.model);

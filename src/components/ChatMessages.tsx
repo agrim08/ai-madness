@@ -47,6 +47,53 @@ export default function ChatMessages() {
     }
   })
 
+  const getModelConfig = (model: string) => {
+    const configs = {
+      openai: { 
+        color: "bg-green-600", 
+        borderColor: "border-green-200",
+        bgColor: "bg-green-50",
+        textColor: "text-green-800",
+        name: "OpenAI"
+      },
+      gemini: { 
+        color: "bg-purple-600", 
+        borderColor: "border-purple-200",
+        bgColor: "bg-purple-50",
+        textColor: "text-purple-800",
+        name: "Gemini"
+      },
+      groq: { 
+        color: "bg-orange-600", 
+        borderColor: "border-orange-200",
+        bgColor: "bg-orange-50",
+        textColor: "text-orange-800",
+        name: "Groq"
+      },
+      deepseek: { 
+        color: "bg-purple-600", 
+        borderColor: "border-purple-200",
+        bgColor: "bg-purple-50",
+        textColor: "text-purple-800",
+        name: "DeepSeek"
+      },
+      anthropic: { 
+        color: "bg-indigo-600", 
+        borderColor: "border-indigo-200",
+        bgColor: "bg-indigo-50",
+        textColor: "text-indigo-800",
+        name: "Claude"
+      },
+    }
+    return configs[model as keyof typeof configs] || { 
+      color: "bg-gray-600", 
+      borderColor: "border-gray-200",
+      bgColor: "bg-gray-50",
+      textColor: "text-gray-800",
+      name: model ? model.charAt(0).toUpperCase() + model.slice(1) : "AI"
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -66,13 +113,13 @@ export default function ChatMessages() {
             <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200/60 shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-2.5 flex-shrink-0 shadow-sm">
+                  <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-2.5 flex-shrink-0 shadow-sm">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-sm text-blue-900">You</span>
-                      <span className="text-xs text-blue-600/70 bg-blue-100 px-2 py-1 rounded-full">
+                      <span className="font-semibold text-sm text-indigo-900">You</span>
+                      <span className="text-xs text-indigo-600/70 bg-indigo-100 px-2 py-1 rounded-full">
                         {formatDistanceToNow(group.user.timestamp, { addSuffix: true })}
                       </span>
                     </div>
@@ -83,34 +130,46 @@ export default function ChatMessages() {
             </Card>
           )}
 
-          {/* Assistant Messages */}
+          {/* Assistant Messages - Now in Rows */}
           {group.assistants.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 ml-4">
-              {group.assistants.map((message) => (
-                <Card
-                  key={message.id}
-                  className="bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200/60 hover:shadow-md transition-shadow"
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-gradient-to-br from-gray-600 to-slate-700 rounded-lg p-2 flex-shrink-0 shadow-sm">
-                        <Bot className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs font-medium capitalize">
-                            {message.model}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-                          </span>
+            <div className="space-y-3 ml-4">
+              {group.assistants.map((message) => {
+                const config = getModelConfig(message.model || "")
+                
+                return (
+                  <Card
+                    key={message.id}
+                    className={`w-full transition-all duration-200 hover:shadow-md ${config.borderColor} border-l-4`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`${config.color} rounded-lg p-2 flex-shrink-0 shadow-sm`}>
+                          <Bot className="h-4 w-4 text-white" />
                         </div>
-                        <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-sm">{config.name}</span>
+                              {/* <Badge variant="outline" className="text-xs font-medium">
+                                {message.model}
+                              </Badge> */}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+                            </span>
+                          </div>
+                          
+                          <div className={`${config.bgColor} rounded-lg p-4 border ${config.borderColor}`}>
+                            <p className={`${config.textColor} text-sm leading-relaxed whitespace-pre-wrap`}>
+                              {message.content}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
         </div>
