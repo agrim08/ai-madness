@@ -1,3 +1,3 @@
 ### AI Fiesta in 144p 🤡
 ### AI - Madness 😂
-## test all famous ai models all together in one dashboard 
+## test all famous ai models all together in one dashboard and see what fits for you best
